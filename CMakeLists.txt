@@ -308,6 +308,7 @@ ELSE()
 
     # set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/linux/hid.c)
 
+    include_directories(/usr/include/hidapi)
     list(APPEND PSMOVEAPI_REQUIRED_LIBS hidapi-hidraw)
     set(HIDAPI_SRC)
     
