@@ -32,6 +32,7 @@
 #define PSMOVESENSORSCENE_H
 
 #include <QtGui>
+#include <QtWidgets/QGraphicsScene>
 
 #include "psmoveqt.hpp"
 

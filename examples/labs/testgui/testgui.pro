@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-QT       += core gui
+QT       += core gui widgets
 
 TARGET = testgui
 TEMPLATE = app

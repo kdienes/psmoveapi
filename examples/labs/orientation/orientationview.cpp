@@ -29,10 +29,10 @@
 
 
 #include "orientationview.h"
-#include "qglbuilder.h"
-#include "qglscenenode.h"
-#include "qglteapot.h"
-#include "qquaternion.h"
+#include "Qt3D/qglbuilder.h"
+#include "Qt3D/qglscenenode.h"
+#include "Qt3D/qglteapot.h"
+#include "QtGui/qquaternion.h"
 #include "math.h"
 
 #include <QDebug>

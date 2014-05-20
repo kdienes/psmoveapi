@@ -28,7 +28,7 @@
  **/
 
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include "psmovetestgui.h"
 
 int main(int argc, char *argv[])
