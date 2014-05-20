@@ -399,7 +399,7 @@ if(PSMOVE_BUILD_EXAMPLES)
             external/TUIO_CPP/oscpack/ip/win32/UdpSocket.cpp)
         set_target_properties(tuio_server PROPERTIES
             COMPILE_FLAGS -DOSC_HOST_LITTLE_ENDIAN)
-        target_link_libraries(tuio_server psmoveapi psmoveapi_tracker)
+        target_link_libraries(tuio_server psmoveapi psmoveapi_tracker ${PSMOVEAPI_TRACKER_REQUIRED_LIBS})
     else()
         # Disable the TUIO Server if we don't build the tracker
         set(PSMOVE_BUILD_TUIO_SERVER OFF)
@@ -408,7 +408,7 @@ if(PSMOVE_BUILD_EXAMPLES)
     if(PSMOVE_BUILD_TRACKER)
         foreach(EXAMPLE distance_calibration)
             add_executable(${EXAMPLE} examples/c/${EXAMPLE}.c)
-            target_link_libraries(${EXAMPLE} psmoveapi psmoveapi_tracker)
+            target_link_libraries(${EXAMPLE} psmoveapi psmoveapi_tracker ${PSMOVEAPI_TRACKER_REQUIRED_LIBS})
         endforeach()
     endif()
 endif()
@@ -424,7 +424,7 @@ if(PSMOVE_BUILD_TESTS)
     if(PSMOVE_BUILD_TRACKER)
         foreach(TESTNAME tracker capture_performance record_video roi_size end2end_latency)
             add_executable(test_${TESTNAME} examples/c/test_${TESTNAME}.c)
-            target_link_libraries(test_${TESTNAME} psmoveapi psmoveapi_tracker)
+            target_link_libraries(test_${TESTNAME} psmoveapi psmoveapi_tracker ${PSMOVEAPI_TRACKER_REQUIRED_LIBS})
         endforeach(TESTNAME)
 
         if (PSMOVE_BUILD_OPENGL_EXAMPLES)
@@ -444,6 +444,7 @@ if(PSMOVE_BUILD_TESTS)
                 target_link_libraries(${EXAMPLE}
                     psmoveapi
                     psmoveapi_tracker
+                    ${PSMOVEAPI_TRACKER_REQUIRED_LIBS}
                     ${OPENGL_EXAMPLES_LIBRARIES})
             endforeach()
         endif()
