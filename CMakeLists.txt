@@ -59,8 +59,8 @@ option(PSMOVE_USE_DEBUG "Build for debugging" OFF)
 # Write debugging images for tracking calibration to home directory
 option(PSMOVE_USE_TRACKER_TRACE "Write tracker calibration images to disk" OFF)
 
-# Madgwick's orientation algorithm (GPL-licensed)
-option(PSMOVE_USE_MADGWICK_AHRS "Use AHRS algorithm (GPL license)" OFF)
+# Madgwick's orientation algorithm
+option(PSMOVE_USE_MADGWICK_AHRS "Use AHRS algorithm" OFF)
 
 # We recommend using MinGW-w64 for the Windows builds which generates
 # position-independent code by default, so skip this for Windows builds.
