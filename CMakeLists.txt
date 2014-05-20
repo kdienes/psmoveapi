@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project(PSMOVEAPI)
 
-include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
-include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
-
 set(PSMOVEAPI_MAJOR_VERSION "3")
 set(PSMOVEAPI_MINOR_VERSION "1")
 set(PSMOVEAPI_PATCH_VERSION "0")
@@ -182,6 +179,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(APPEND PSMOVEAPI_REQUIRED_LIBS ${IOBLUETOOTH})
 
     set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/mac/hid.c)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
 
     # Build Universal Binaries for OS X
     set(CMAKE_OSX_ARCHITECTURES "x86_64")
@@ -255,6 +254,8 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     ENDIF()
 
     set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/windows/hid.c)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
 
     list(APPEND PSMOVEAPI_TRACKER_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/camera_control_win32.c)
@@ -282,7 +283,20 @@ ELSE()
     include_directories(${BLUEZ_INCLUDE_DIRS})
     list(APPEND PSMOVEAPI_REQUIRED_LIBS ${BLUEZ_LIBRARIES})
 
-    set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/linux/hid.c)
+    find_library(GLM glm)
+    if(${GLM} MATCHES "-NOTFOUND")
+      include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
+    endif()
+
+    find_library(HIDAPI hidapi-hidraw)
+    if(${HIDAPI} MATCHES "-NOTFOUND")
+      set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/linux/hid.c)
+      include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
+    else()
+      include_directories(/usr/include/hidapi)
+      list(APPEND PSMOVEAPI_REQUIRED_LIBS hidapi-hidraw)
+      set(HIDAPI_SRC)
+    endif()
 
     list(APPEND PSMOVEAPI_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/platform/psmove_linuxsupport.c)
@@ -291,6 +305,16 @@ ELSE()
         ${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/psmove_linuxsupport.c
         ${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/camera_control_linux.c)
 ENDIF()
+
+find_library(INIPARSER iniparser)
+if(${INIPARSER} MATCHES "-NOTFOUND")
+  file(GLOB PSMOVEAPI_TRACKER_INIPARSER_SRC
+    "${PSMOVEAPI_SOURCE_DIR}/external/iniparser/*.c")
+else()
+  list(APPEND PSMOVEAPI_TRACKER_REQUIRED_LIBS iniparser)
+  set(PSMOVEAPI_TRACKER_INIPARSER_SRC
+    "${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/iniparser_extra.c")
+endif()
 
 include_directories(${PSMOVEAPI_SOURCE_DIR}/include)
 
@@ -301,7 +325,6 @@ file(GLOB PSMOVEAPI_MOVED_SRC
 file(GLOB PSMOVEAPI_TRACKER_SRC
     "${PSMOVEAPI_SOURCE_DIR}/src/tracker/*.c"
     "${PSMOVEAPI_SOURCE_DIR}/src/tracker/*.cpp"
-    "${PSMOVEAPI_SOURCE_DIR}/external/iniparser/*.c"
 )
 
 file(GLOB PSMOVEAPI_SRC
@@ -342,6 +365,7 @@ set_target_properties(psmoveapi_static PROPERTIES
 if(PSMOVE_BUILD_TRACKER)
     add_library(psmoveapi_tracker SHARED
         ${PSMOVEAPI_TRACKER_SRC}
+        ${PSMOVEAPI_TRACKER_INIPARSER_SRC}
         ${PSMOVEAPI_TRACKER_PLATFORM_SRC})
     target_link_libraries(psmoveapi_tracker
         psmoveapi
@@ -356,6 +380,7 @@ if(PSMOVE_BUILD_TRACKER)
 
     add_library(psmoveapi_tracker_static STATIC
         ${PSMOVEAPI_TRACKER_SRC}
+        ${PSMOVEAPI_TRACKER_INIPARSER_SRC}
         ${PSMOVEAPI_TRACKER_PLATFORM_SRC})
     target_link_libraries(psmoveapi_tracker_static
         psmoveapi_static
