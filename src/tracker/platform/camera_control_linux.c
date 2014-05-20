@@ -30,7 +30,7 @@
 #include "../camera_control.h"
 #include "../camera_control_private.h"
 
-#include "../../../external/iniparser/iniparser.h"
+#include <iniparser/iniparser.h>
 
 #include <linux/videodev2.h>
 #include <libv4l2.h>
