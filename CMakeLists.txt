@@ -87,23 +87,31 @@ else()
     set(INFO_USE_DEBUG "No")
 endif()
 
+set(INFO_LICENSE "BSD")
+
+set(INFO_AHRS_ALGORITHM "None")
+set(PSMOVEAPI_ALGORITHM_SRC)
+
 # AHRS algorithm
 if(PSMOVE_USE_MADGWICK_AHRS)
+
     add_definitions(-DPSMOVE_WITH_MADGWICK_AHRS)
-    set(INFO_LICENSE "GPL")
     set(INFO_AHRS_ALGORITHM "Madgwick AHRS")
-    set(PSMOVEAPI_ALGORITHM_SRC
-        ${PSMOVEAPI_SOURCE_DIR}/external/MadgwickAHRS/MadgwickAHRS.c
-    )
-else()
-    if (PSMOVE_USE_PS3EYE_DRIVER)
-        # PS3EYEDriver is based on GPL'd code as well
-        set(INFO_LICENSE "GPL")
+
+    find_library(MADGWICK_AHRS madgwick-ahrs)
+    if(${MADGWICK_AHRS} MATCHES "-NOTFOUND")
+      set(INFO_LICENSE "${INFO_LICENSE}, CC-BY-SA-3.0")
+      include_directories(${PSMOVEAPI_SOURCE_DIR}/external/MadgwickAHRS)
+      set(PSMOVEAPI_ALGORITHM_SRC ${PSMOVEAPI_SOURCE_DIR}/external/MadgwickAHRS/MadgwickAHRS.c)
     else()
-        set(INFO_LICENSE "BSD")
+      include_directories(/usr/include/ahrs)
+      list(APPEND PSMOVEAPI_REQUIRED_LIBS madgwick-ahrs)
     endif()
-    set(INFO_AHRS_ALGORITHM "None")
-    set(PSMOVEAPI_ALGORITHM_SRC)
+  endif()
+
+if (PSMOVE_USE_PS3EYE_DRIVER)
+    # PS3EYEDriver is based on GPL'd code as well
+      set(INFO_LICENSE "${INFO_LICENSE}, GPL")
 endif()
 
 # Linker commands to put into the .pc file (when installing)
