@@ -1,3 +1,9 @@
+psmoveapi (3.0.1.5) unstable; urgency=low
+
+  * Update Debian packaging.
+
+ -- Klee Dienes <klee@mit.edu>  Tue, 20 May 2014 21:00:04 -0400
+
 psmoveapi (3.0.0) unstable; urgency=low
 
   * PS Move API 3.0.0 for Debian-based systems.
