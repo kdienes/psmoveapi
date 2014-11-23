@@ -4,7 +4,14 @@ psmoveapi (3.0.1.5) unstable; urgency=low
 
  -- Klee Dienes <klee@mit.edu>  Tue, 20 May 2014 21:00:04 -0400
 
-psmoveapi (3.0.0.1) unstable; urgency=low
+psmoveapi (3.0.1.2) unstable; urgency=low
+
+  * Revise calibration threshold.
+
+ -- Klee Dienes <klee@mit.edu>  Tue, 10 Dec 2013 12:29:47 -0500
+
+psmoveapi (3.0.1.1) unstable; urgency=low
+>>>>>>> 26817f1... Revise calibration.
 
   * Fixed HIDAPI.
 
