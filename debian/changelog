@@ -4,6 +4,12 @@ psmoveapi (3.0.1.5) unstable; urgency=low
 
  -- Klee Dienes <klee@mit.edu>  Tue, 20 May 2014 21:00:04 -0400
 
+psmoveapi (3.0.0.1) unstable; urgency=low
+
+  * Fixed HIDAPI.
+
+ -- Klee Dienes <klee@mit.edu>  Fri, 04 Oct 2013 20:45:37 -0400
+
 psmoveapi (3.0.0) unstable; urgency=low
 
   * PS Move API 3.0.0 for Debian-based systems.
