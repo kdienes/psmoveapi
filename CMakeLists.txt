@@ -402,6 +402,13 @@ endforeach()
 
 # C examples
 if(PSMOVE_BUILD_EXAMPLES)
+
+    add_subdirectory(examples/labs/orientation)
+
+    if(PSMOVE_BUILD_QT_BINDINGS)
+        add_subdirectory(examples/labs/testgui)
+    endif(PSMOVE_BUILD_QT_BINDINGS)
+
     foreach(EXAMPLE example multiple dump_calibration battery_check)
         add_executable(${EXAMPLE} examples/c/${EXAMPLE}.c)
         target_link_libraries(${EXAMPLE} psmoveapi)
