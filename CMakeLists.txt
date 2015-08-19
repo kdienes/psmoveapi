@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project(PSMOVEAPI)
 
-include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
-include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
-
 set(PSMOVEAPI_MAJOR_VERSION "3")
 set(PSMOVEAPI_MINOR_VERSION "1")
 set(PSMOVEAPI_PATCH_VERSION "0")
@@ -59,8 +56,11 @@ option(PSMOVE_USE_DEBUG "Build for debugging" OFF)
 # Write debugging images for tracking calibration to home directory
 option(PSMOVE_USE_TRACKER_TRACE "Write tracker calibration images to disk" OFF)
 
-# Madgwick's orientation algorithm (GPL-licensed)
-option(PSMOVE_USE_MADGWICK_AHRS "Use AHRS algorithm (GPL license)" OFF)
+# Madgwick's orientation algorithm
+option(PSMOVE_USE_MADGWICK_AHRS "Use AHRS algorithm" OFF)
+
+# Bluez 5.x support (Linux only)
+option(PSMOVE_BLUEZ5_SUPPORT "Enable Bluez 5.x support" OFF)
 
 # We recommend using MinGW-w64 for the Windows builds which generates
 # position-independent code by default, so skip this for Windows builds.
@@ -90,23 +90,31 @@ else()
     set(INFO_USE_DEBUG "No")
 endif()
 
+set(INFO_LICENSE "BSD")
+
+set(INFO_AHRS_ALGORITHM "None")
+set(PSMOVEAPI_ALGORITHM_SRC)
+
 # AHRS algorithm
 if(PSMOVE_USE_MADGWICK_AHRS)
+
     add_definitions(-DPSMOVE_WITH_MADGWICK_AHRS)
-    set(INFO_LICENSE "GPL")
     set(INFO_AHRS_ALGORITHM "Madgwick AHRS")
-    set(PSMOVEAPI_ALGORITHM_SRC
-        ${PSMOVEAPI_SOURCE_DIR}/external/MadgwickAHRS/MadgwickAHRS.c
-    )
-else()
-    if (PSMOVE_USE_PS3EYE_DRIVER)
-        # PS3EYEDriver is based on GPL'd code as well
-        set(INFO_LICENSE "GPL")
+
+    find_library(MADGWICK_AHRS madgwick-ahrs)
+    if(${MADGWICK_AHRS} MATCHES "-NOTFOUND")
+      set(INFO_LICENSE "${INFO_LICENSE}, CC-BY-SA-3.0")
+      include_directories(${PSMOVEAPI_SOURCE_DIR}/external/MadgwickAHRS)
+      set(PSMOVEAPI_ALGORITHM_SRC ${PSMOVEAPI_SOURCE_DIR}/external/MadgwickAHRS/MadgwickAHRS.c)
     else()
-        set(INFO_LICENSE "BSD")
+      include_directories(/usr/include/ahrs)
+      list(APPEND PSMOVEAPI_REQUIRED_LIBS madgwick-ahrs)
     endif()
-    set(INFO_AHRS_ALGORITHM "None")
-    set(PSMOVEAPI_ALGORITHM_SRC)
+  endif()
+
+if (PSMOVE_USE_PS3EYE_DRIVER)
+    # PS3EYEDriver is based on GPL'd code as well
+      set(INFO_LICENSE "${INFO_LICENSE}, GPL")
 endif()
 
 # Linker commands to put into the .pc file (when installing)
@@ -185,6 +193,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     list(APPEND PSMOVEAPI_REQUIRED_LIBS ${IOBLUETOOTH})
 
     set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/mac/hid.c)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
 
     # Build Universal Binaries for OS X
     set(CMAKE_OSX_ARCHITECTURES "x86_64")
@@ -258,6 +268,8 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     ENDIF()
 
     set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/windows/hid.c)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
+    include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
 
     list(APPEND PSMOVEAPI_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/platform/psmove_winsupport.c)
@@ -288,7 +300,20 @@ ELSE()
     include_directories(${BLUEZ_INCLUDE_DIRS})
     list(APPEND PSMOVEAPI_REQUIRED_LIBS ${BLUEZ_LIBRARIES})
 
-    set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/linux/hid.c)
+    find_library(GLM glm)
+    if(${GLM} MATCHES "-NOTFOUND")
+      include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
+    endif()
+
+    find_library(HIDAPI hidapi-hidraw)
+    if(${HIDAPI} MATCHES "-NOTFOUND")
+      set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/linux/hid.c)
+      include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
+    else()
+      include_directories(/usr/include/hidapi)
+      list(APPEND PSMOVEAPI_REQUIRED_LIBS hidapi-hidraw)
+      set(HIDAPI_SRC)
+    endif()
 
     list(APPEND PSMOVEAPI_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/platform/psmove_linuxsupport.c)
@@ -297,6 +322,16 @@ ELSE()
         ${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/psmove_linuxsupport.c
         ${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/camera_control_linux.c)
 ENDIF()
+
+find_library(INIPARSER iniparser)
+if(${INIPARSER} MATCHES "-NOTFOUND")
+  file(GLOB PSMOVEAPI_TRACKER_INIPARSER_SRC
+    "${PSMOVEAPI_SOURCE_DIR}/external/iniparser/*.c")
+else()
+  list(APPEND PSMOVEAPI_TRACKER_REQUIRED_LIBS iniparser)
+  set(PSMOVEAPI_TRACKER_INIPARSER_SRC
+    "${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/iniparser_extra.c")
+endif()
 
 include_directories(${PSMOVEAPI_SOURCE_DIR}/include)
 
@@ -307,7 +342,6 @@ file(GLOB PSMOVEAPI_MOVED_SRC
 file(GLOB PSMOVEAPI_TRACKER_SRC
     "${PSMOVEAPI_SOURCE_DIR}/src/tracker/*.c"
     "${PSMOVEAPI_SOURCE_DIR}/src/tracker/*.cpp"
-    "${PSMOVEAPI_SOURCE_DIR}/external/iniparser/*.c"
 )
 
 file(GLOB PSMOVEAPI_SRC
@@ -348,6 +382,7 @@ set_target_properties(psmoveapi_static PROPERTIES
 if(PSMOVE_BUILD_TRACKER)
     add_library(psmoveapi_tracker SHARED
         ${PSMOVEAPI_TRACKER_SRC}
+        ${PSMOVEAPI_TRACKER_INIPARSER_SRC}
         ${PSMOVEAPI_TRACKER_PLATFORM_SRC})
     target_link_libraries(psmoveapi_tracker
         psmoveapi
@@ -362,6 +397,7 @@ if(PSMOVE_BUILD_TRACKER)
 
     add_library(psmoveapi_tracker_static STATIC
         ${PSMOVEAPI_TRACKER_SRC}
+        ${PSMOVEAPI_TRACKER_INIPARSER_SRC}
         ${PSMOVEAPI_TRACKER_PLATFORM_SRC})
     target_link_libraries(psmoveapi_tracker_static
         psmoveapi_static
@@ -383,6 +419,13 @@ endforeach()
 
 # C examples
 if(PSMOVE_BUILD_EXAMPLES)
+
+#    add_subdirectory(examples/labs/orientation)
+
+    if(PSMOVE_BUILD_QT_BINDINGS)
+        add_subdirectory(examples/labs/testgui)
+    endif(PSMOVE_BUILD_QT_BINDINGS)
+
     foreach(EXAMPLE example multiple dump_calibration battery_check)
         add_executable(${EXAMPLE} examples/c/${EXAMPLE}.c)
         target_link_libraries(${EXAMPLE} psmoveapi)
@@ -405,7 +448,7 @@ if(PSMOVE_BUILD_EXAMPLES)
             external/TUIO_CPP/oscpack/ip/win32/UdpSocket.cpp)
         set_target_properties(tuio_server PROPERTIES
             COMPILE_FLAGS -DOSC_HOST_LITTLE_ENDIAN)
-        target_link_libraries(tuio_server psmoveapi psmoveapi_tracker)
+        target_link_libraries(tuio_server psmoveapi psmoveapi_tracker ${PSMOVEAPI_TRACKER_REQUIRED_LIBS})
     else()
         # Disable the TUIO Server if we don't build the tracker
         set(PSMOVE_BUILD_TUIO_SERVER OFF)
@@ -414,7 +457,7 @@ if(PSMOVE_BUILD_EXAMPLES)
     if(PSMOVE_BUILD_TRACKER)
         foreach(EXAMPLE distance_calibration)
             add_executable(${EXAMPLE} examples/c/${EXAMPLE}.c)
-            target_link_libraries(${EXAMPLE} psmoveapi psmoveapi_tracker)
+            target_link_libraries(${EXAMPLE} psmoveapi psmoveapi_tracker ${PSMOVEAPI_TRACKER_REQUIRED_LIBS})
         endforeach()
     endif()
 endif()
@@ -430,7 +473,7 @@ if(PSMOVE_BUILD_TESTS)
     if(PSMOVE_BUILD_TRACKER)
         foreach(TESTNAME tracker capture_performance record_video roi_size end2end_latency)
             add_executable(test_${TESTNAME} examples/c/test_${TESTNAME}.c)
-            target_link_libraries(test_${TESTNAME} psmoveapi psmoveapi_tracker)
+            target_link_libraries(test_${TESTNAME} psmoveapi psmoveapi_tracker ${PSMOVEAPI_TRACKER_REQUIRED_LIBS})
         endforeach(TESTNAME)
 
         if (PSMOVE_BUILD_OPENGL_EXAMPLES)
@@ -450,6 +493,7 @@ if(PSMOVE_BUILD_TESTS)
                 target_link_libraries(${EXAMPLE}
                     psmoveapi
                     psmoveapi_tracker
+                    ${PSMOVEAPI_TRACKER_REQUIRED_LIBS}
                     ${OPENGL_EXAMPLES_LIBRARIES})
             endforeach()
         endif()
@@ -632,21 +676,16 @@ install(TARGETS ${PSMOVEAPI_INSTALL_TARGETS}
     ARCHIVE DESTINATION ${PSMOVEAPI_LIB_DEST}
 )
 
-install(FILES ${PSMOVEAPI_HEADERS} DESTINATION include/psmoveapi)
+install(FILES ${PSMOVEAPI_HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/include/psmove_config.h DESTINATION include/psmoveapi)
 install(FILES README COPYING LAYOUT INSTALL DESTINATION share/psmoveapi)
 
 
 # Qt bindings
 if(PSMOVE_BUILD_QT_BINDINGS)
-    find_package(Qt4 QUIET)
-
-    if(QT_QTDECLARATIVE_FOUND)
-        add_subdirectory(bindings/qt)
-        set(INFO_BUILD_QT_BINDINGS "Yes")
-    else()
-        message(FATAL_ERROR "Qt bindings were requested with PSMOVE_BUILD_QT_BINDINGS, but not found on the system.")
-        # set(INFO_BUILD_QT_BINDINGS "No (Qt not found)")
-    endif()
+    find_package(Qt5Core REQUIRED)
+    find_package(Qt5Quick REQUIRED)
+    add_subdirectory(bindings/qt)
+    set(INFO_BUILD_QT_BINDINGS "Yes")
 else()
     set(INFO_BUILD_QT_BINDINGS "No (disabled)")
 endif()

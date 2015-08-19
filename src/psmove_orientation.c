@@ -38,7 +38,7 @@
 #include "psmove_orientation.h"
 
 #if defined(PSMOVE_WITH_MADGWICK_AHRS)
-#  include "../external/MadgwickAHRS/MadgwickAHRS.h"
+#  include "MadgwickAHRS.h"
 #endif
 
 
@@ -138,17 +138,18 @@ psmove_orientation_update(PSMoveOrientation *orientation)
 
 #if defined(PSMOVE_WITH_MADGWICK_AHRS)
         MadgwickAHRSupdate(orientation->quaternion,
-                orientation->sample_freq,
-
-                /* Accelerometer */
-                orientation->output[0],
-                orientation->output[2],
-                -orientation->output[1],
+			   orientation->sample_freq,
+			   0.5f,
 
                 /* Gyroscope */
                 orientation->output[3],
                 orientation->output[5],
                 -orientation->output[4],
+
+                /* Accelerometer */
+                orientation->output[0],
+                orientation->output[2],
+                -orientation->output[1],
 
                 /* Magnetometer */
                 orientation->output[6],

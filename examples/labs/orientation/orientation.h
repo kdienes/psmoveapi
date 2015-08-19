@@ -28,9 +28,9 @@
  **/
 
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QThread>
-#include "qglscenenode.h"
+#include "Qt3D/qglscenenode.h"
 
 #include <unistd.h>
 #include <stdio.h>

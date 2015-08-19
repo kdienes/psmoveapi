@@ -38,7 +38,7 @@ class OrientationView : public QGLView
 {
     Q_OBJECT
 public:
-    OrientationView(QWidget *parent = 0) : QGLView(parent), teapot(0) {}
+    OrientationView(QWindow *parent = 0) : QGLView(parent), teapot(0) {}
     ~OrientationView();
 
 protected:

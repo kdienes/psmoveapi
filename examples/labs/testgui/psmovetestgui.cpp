@@ -35,6 +35,9 @@
 
 #include "devicechooserdialog.h"
 
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QColorDialog>
+
 PSMoveTestGUI::PSMoveTestGUI(QWidget *parent) :
     QMainWindow(parent),
     psm(NULL),

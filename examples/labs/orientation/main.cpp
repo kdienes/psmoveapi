@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     OrientationView view;
+    view.resize(800, 600);
 
     Orientation orientation;
     orientation.start();

@@ -31,7 +31,7 @@
 #include "psmoveqt.hpp"
 
 #ifdef QT_DECLARATIVE_LIB
-#  include <QtDeclarative>
+#  include <QtQuick>
 #endif
 
 /* Update interval for sensor readings and LED setting */

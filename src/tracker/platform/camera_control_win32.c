@@ -32,7 +32,7 @@
 
 #include "psmove_tracker.h"
 
-#include "../../../external/iniparser/iniparser.h"
+#include <iniparser/iniparser.h>
 
 #include "../camera_control.h"
 #include "../camera_control_private.h"

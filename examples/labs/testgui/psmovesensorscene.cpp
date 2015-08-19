@@ -27,6 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  **/
 
+#include <QtWidgets/QGraphicsLineItem>
 
 #include "psmovesensorscene.h"
 
@@ -38,14 +39,16 @@ PSMoveSensorScene::PSMoveSensorScene(QObject *parent, PSMoveQt *psm) :
 {
     setSceneRect(-100, -100, 200, 200);
 
-    gyro = new QGraphicsLineItem(NULL, this);
+    gyro = new QGraphicsLineItem();
+    this->addItem(gyro);
     gyro->setLine(0, 0, 0, 0);
     gyro->setPen(QPen(Qt::red, 2));
 
     connect(psm, SIGNAL(gyroChanged()),
             this, SLOT(onGyroChanged()));
 
-    accel = new QGraphicsLineItem(NULL, this);
+    accel = new QGraphicsLineItem();
+    this->addItem(accel);
     accel->setLine(0, 0, 0, 0);
     accel->setPen(QPen(Qt::blue, 2));
 

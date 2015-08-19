@@ -31,7 +31,7 @@
 #ifndef DEVICECHOOSERDIALOG_H
 #define DEVICECHOOSERDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 
 #include <psmovetestgui.h>
 

@@ -31,7 +31,8 @@
 #ifndef PSMOVETESTGUI_H
 #define PSMOVETESTGUI_H
 
-#include <QMainWindow>
+#include <QtCore/qcoreapplication.h>
+#include <QtWidgets/QMainWindow>
 
 #include "psmoveqt.hpp"
 
