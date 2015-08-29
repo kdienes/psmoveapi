@@ -270,9 +270,12 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/windows/hid.c)
     include_directories(${PSMOVEAPI_SOURCE_DIR}/external/hidapi/hidapi)
     include_directories(${PSMOVEAPI_SOURCE_DIR}/external/glm)
+<<<<<<< HEAD
 
     list(APPEND PSMOVEAPI_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/platform/psmove_winsupport.c)
+=======
+>>>>>>> 5d83eda1a4cff38ef56be8c95e374ad69987c083
 
     list(APPEND PSMOVEAPI_TRACKER_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/tracker/platform/camera_control_win32.c)
@@ -314,7 +317,16 @@ ELSE()
       list(APPEND PSMOVEAPI_REQUIRED_LIBS hidapi-hidraw)
       set(HIDAPI_SRC)
     endif()
+<<<<<<< HEAD
+=======
 
+    # set(HIDAPI_SRC ${PSMOVEAPI_SOURCE_DIR}/external/hidapi/linux/hid.c)
+>>>>>>> 5d83eda1a4cff38ef56be8c95e374ad69987c083
+
+    include_directories(/usr/include/hidapi)
+    list(APPEND PSMOVEAPI_REQUIRED_LIBS hidapi-hidraw)
+    set(HIDAPI_SRC)
+    
     list(APPEND PSMOVEAPI_PLATFORM_SRC
         ${PSMOVEAPI_SOURCE_DIR}/src/platform/psmove_linuxsupport.c)
 
@@ -420,7 +432,11 @@ endforeach()
 # C examples
 if(PSMOVE_BUILD_EXAMPLES)
 
+<<<<<<< HEAD
 #    add_subdirectory(examples/labs/orientation)
+=======
+    add_subdirectory(examples/labs/orientation)
+>>>>>>> 5d83eda1a4cff38ef56be8c95e374ad69987c083
 
     if(PSMOVE_BUILD_QT_BINDINGS)
         add_subdirectory(examples/labs/testgui)
